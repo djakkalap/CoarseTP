@@ -9,51 +9,45 @@ using Smod2.EventHandlers;
 using Smod2.Events;
 
 namespace CoarseTP {
-    class LoadPluginHandler : IEventHandlerWaitingForPlayers {
+    public class LoadPluginHandler  {
         private readonly CTPPlugin plugin;
 
         public LoadPluginHandler(CTPPlugin plugin) => this.plugin = plugin;
 
-        public void OnWaitingForPlayers(WaitingForPlayersEvent ev) {
-            if (plugin.GetConfigBool("ctp_disable"))
-            {
-                plugin.PluginManager.DisablePlugin(plugin);
-            } else
-            {
-                List<Vector> allowedPositions = new List<Vector>();
-                List<ZoneType> posZones = new List<ZoneType>();
-                string[] AllowedRIDs = { "LC_CAFE", "HC_079_HALL" };
-                // This gets all the rooms with a roomID
-                UnityEngine.GameObject[] allRooms = UnityEngine.GameObject.FindGameObjectsWithTag("RoomID");
+        public void OnWaitingForPlayers() {
+            List<Vector> allowedPositions = new List<Vector>();
+            List<ZoneType> posZones = new List<ZoneType>();
+            string[] AllowedRIDs = { "LC_CAFE", "HC_079_HALL" };
+            // This gets all the rooms with a roomID
+            UnityEngine.GameObject[] allRooms = UnityEngine.GameObject.FindGameObjectsWithTag("RoomID");
 
-                foreach (UnityEngine.GameObject room in allRooms)
+            foreach (UnityEngine.GameObject room in allRooms)
+            {
+                string rid = room.GetComponent<Rid>().id;
+
+                if (AllowedRIDs.Contains(rid))
                 {
-                    string rid = room.GetComponent<Rid>().id;
+                    UnityEngine.Vector3 roomPos = room.transform.position;
 
-                    if (AllowedRIDs.Contains(rid))
+                    if (rid == "HC_079_HALL")
                     {
-                        UnityEngine.Vector3 roomPos = room.transform.position;
-
-                        if (rid == "HC_079_HALL")
+                        if (roomPos.y > -1004)
                         {
-                            if (roomPos.y > -1004)
-                            {
-                                allowedPositions.Add(new Vector(roomPos.x, roomPos.y + 2.0f, roomPos.z));
-                                posZones.Add(ZoneType.HCZ);
-                            }
-                        }
-                        else
-                        {
-                            // We add 1 unit to the y component, to prevent getting stuck or other weird glitches.
                             allowedPositions.Add(new Vector(roomPos.x, roomPos.y + 2.0f, roomPos.z));
-                            posZones.Add(ZoneType.LCZ);
+                            posZones.Add(ZoneType.HCZ);
                         }
                     }
+                    else
+                    {
+                        // We add 1 unit to the y component, to prevent getting stuck or other weird glitches.
+                        allowedPositions.Add(new Vector(roomPos.x, roomPos.y + 2.0f, roomPos.z));
+                        posZones.Add(ZoneType.LCZ);
+                    }
                 }
-
-                plugin.allowedPositions = allowedPositions;
-                plugin.posZones = posZones;
             }
+
+            plugin.allowedPositions = allowedPositions;
+            plugin.posZones = posZones;
         }
     }
 }
