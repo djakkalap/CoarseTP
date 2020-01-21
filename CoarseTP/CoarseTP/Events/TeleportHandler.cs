@@ -3,90 +3,71 @@ using System.Collections.Generic;
 using System.Linq;
 using MEC;
 
-using Smod2;
-using Smod2.API;
-using Smod2.Attributes;
-using Smod2.Config;
-using Smod2.EventHandlers;
-using Smod2.Events;
+using EXILED;
 
 namespace CoarseTP {
-    class TeleportHandler : IEventHandlerSCP914Activate {
+    public class TeleportHandler {
         private readonly CTPPlugin plugin;
+        private readonly Random rand;
 
         // Add plugin instance to the handler.
-        public TeleportHandler(CTPPlugin plugin) => this.plugin = plugin;
+        public TeleportHandler(CTPPlugin plugin) { 
+            this.plugin = plugin;
+
+            this.rand = new Random();
+        }
 
         // Handle the event.   
-        public void OnSCP914Activate(SCP914ActivateEvent ev) {
-            if (ev.KnobSetting == KnobSetting.COARSE)
+        public void OnSCP914Activate(ref SCP914UpgradeEvent ev) {
+            if (ev.KnobSetting == Scp914.Scp914Knob.Coarse)
             {
-                List<Player> players = GetPlayersFromInputs(ev.Inputs);
-                
-                if (players.Count > 0)
+                // List<ReferenceHub> players = GetPlayersFromInputs(ev.Players);
+                // List<Smod2.API.Player> players = GetPlayers(ev.Players);
+
+                if (ev.Players.Count > 0)
                 {
-                    Vector randomPos = GetRandomTeleportPos();
+                    Smod2.API.Vector randomPos = GetRandomTeleportPos();
 
                     // Teleport players to the position vector.
-                    foreach (Player player in players)
+                    foreach (ReferenceHub rHub in ev.Players) 
                     {
-                        // So why do I teleport someone using a coroutine? I don't know, but the normal way didn't work.
-                        // It might have interfered with the way SCP:SL does the teleport to the outtake.
-                        Timing.RunCoroutine(_Teleport(player, randomPos));
-                        
-
-                        if (!plugin.GetConfigBool("ctp_damage_disable"))
-                        {
-                            AlterHealth(player);
-                        }
+                        //player.Teleport(randomPos);
+                        Timing.RunCoroutine(_Teleport(rHub, randomPos));
                     }
                 }
             }
         }
         
-        // This method changes the player's health after using SCP-914.
-        private void AlterHealth(Player player) {
-            if ((player.TeamRole.Team != Smod2.API.Team.TUTORIAL) && (player.TeamRole.Team != Smod2.API.Team.SCP))
-            {
-                player.SetHealth((int) (player.GetHealth() - (player.TeamRole.MaxHP * plugin.GetConfigFloat("ctp_health_multiplier"))), DamageType.RAGDOLLLESS);
-            }
-        }
+        private List<Smod2.API.Player> GetPlayers(List<ReferenceHub> inputs) {
+            List<Smod2.API.Player> players = new List<Smod2.API.Player>();
 
-        private List<Player> GetPlayersFromInputs(object[] inputs) {
-            List<Player> players = new List<Player>();
-
-            foreach (UnityEngine.Collider collider in inputs)
+            foreach (ReferenceHub rHub in inputs)
             {
-                // This signifies that the collider is a player.
-                // NOTE!
-                // There is something really sketchy here with the GameObject and stuff. I used the UnityEngine.CoreModule.dll
-                // from SCP:SL and the UnityEngine.dll from Unity itself, it was the only way I got this to work.
-                if (collider.name == "Player")
-                {
-                    players.Add(new ServerMod2.API.SmodPlayer(collider.gameObject));
-                }
+                players.Add(new ServerMod2.API.SmodPlayer(rHub.gameObject));
             }
 
             return players;
         }
 
         // This function is horrible, I'll change it when I need to.
-        private Vector GetRandomTeleportPos() {
-            Random rand = new Random();
+        private Smod2.API.Vector GetRandomTeleportPos() {
+            double num = rand.NextDouble();
 
-            if (rand.NextDouble() < plugin.GetConfigFloat("ctp_hcz_chance"))
+            Plugin.Info("randiadjs: " + num);
+
+            if (num < 0.1f)
             {
-                return plugin.allowedPositions.ElementAt(plugin.posZones.FindIndex(zone => zone.Equals(ZoneType.HCZ)));
+                return plugin.allowedPositions.ElementAt(plugin.posZones.FindIndex(zone => zone.Equals(Smod2.API.ZoneType.HCZ)));
             } else
             {
-                return plugin.allowedPositions.ElementAt(plugin.posZones.FindIndex(zone => zone.Equals(ZoneType.LCZ)));
+                return plugin.allowedPositions.ElementAt(plugin.posZones.FindIndex(zone => zone.Equals(Smod2.API.ZoneType.LCZ)));
             }
         }
 
-        private IEnumerator<float> _Teleport(Player player, Vector pos) {
-            yield return Timing.WaitForSeconds(0.1f);
+        private IEnumerator<float> _Teleport(ReferenceHub player, Smod2.API.Vector pos) {
+            yield return Timing.WaitForSeconds(.1f);
 
-            player.Teleport(pos, true);
+            player.plyMovementSync.OverridePosition(new UnityEngine.Vector3(pos.x, pos.y, pos.z), 0f, false);
         }
     }
 }
