@@ -31,14 +31,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>C:\csharpdlls\Assembly-CSharp.dll</HintPath>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\ROB-PC\source\repos\ServerInfo\ServerInfo\bin\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>F:\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="Smod2">
-      <HintPath>C:\csharpdlls\Smod2.dll</HintPath>
+    <Reference Include="EXILED">
+      <HintPath>..\..\..\server_files\exiled\EXILED.dll</HintPath>
+    </Reference>
+    <Reference Include="EXILED_Events">
+      <HintPath>..\..\..\server_files\exiled\EXILED_Events.dll</HintPath>
+    </Reference>
+    <Reference Include="Mirror">
+      <HintPath>..\..\..\server_files\vanilla\Mirror.dll</HintPath>
+    </Reference>
+    <Reference Include="Smod2, Version=3.5.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\server_files\exiled\Smod2.dll</HintPath>
+    </Reference>
+    <Reference Include="Smod2-Exiled">
+      <HintPath>..\..\..\server_files\exiled\Smod2-Exiled.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,7 +71,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoarseTP\Commands\CTPDisableCommand.cs" />
     <Compile Include="CoarseTP\CTPPlugin.cs" />
     <Compile Include="CoarseTP\Events\LoadPluginHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
